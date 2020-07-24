@@ -13,30 +13,183 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "Game.h"
 #include "GameView.h"
 #include "Map.h"
 #include "Places.h"
+
+#define MAX_TRAPS 3 
+#define MOVES_SIZE 7
+#define ROUND_SIZE (MOVES_SIZE * NUM_PLAYERS + NUM_PLAYERS) // size of each round
+#define LAST_ROUND_SIZE (ROUND_SIZE-1) // size of last round
+#define MOVE_DELIM " "
+#define PLACE_ABBREV_SIZE 2
+#define START_PLAY_ACTION 3
+
 // add your own #includes here
 
 // TODO: ADD YOUR OWN STRUCTS HERE
 
+struct playerStats{
+	int health;
+	PlaceId *moveHist; //chronological order
+	int moveHistSize;//stores size of array
+
+};
+typedef struct playerStats * PlayerStats;
+
 struct gameView {
-	// TODO: ADD FIELDS HERE
+	int gamescore;
+	Round round;
+	PlaceId *trapLocations; // array of trap locations
+	int trapLocationSize; 
+	PlaceId vampLocation;
+	PlayerStats *playerStats; //array of playerstats
+	Player player; // current player
+	PlaceId *trail; // queue array of trail locations
+	int trailSize;
 };
 
 ////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
 
+// Gets place ID from move
+PlaceId getPlaceFromMove(char *move)
+{
+	char abbrev[PLACE_ABBREV_SIZE+1];//accounts for null string operator
+	strncpy(abbrev, move+1, PLACE_ABBREV_SIZE);//skips first element and copies location into abbrev
+	return placeAbbrevToId(abbrev); // see use of Function in Places.h
+}
+//Returns player name from the first element of move string 
+Player playerFromChar(char c)
+{
+	if (c == 'G')
+		return PLAYER_LORD_GODALMING;
+	if (c == 'S')
+		return PLAYER_DR_SEWARD;
+	if (c == 'H')
+		return PLAYER_VAN_HELSING;
+	if (c == 'M')
+		return PLAYER_MINA_HARKER;
+	if (c == 'D')
+		return PLAYER_DRACULA;
+}
+// TO DO updates health of Dracula and Hunters
+void updateHealth(GameView gv, int healthChange, Player player)
+{
+
+	gv->playerStats[player]->health += healthChange; // update player health
+	if (player != PLAYER_DRACULA && gv->playerStats[player]->health > GAME_START_HUNTER_LIFE_POINTS)
+		gv->playerStats[player]->health = GAME_START_HUNTER_LIFE_POINTS; // set hunter health to max 
+	if (gv->playerStats[player]->health <= 0)
+	{
+		gv->playerStats[player]->health = 0;//if hunter health is negative or 0 set to 0
+		if (player != PLAYER_DRACULA)
+			gv->gamescore -= SCORE_LOSS_HUNTER_HOSPITAL; // update game score -4
+	}	
+} 
+
+//handles the encounters for the hunters
+void handleHunter(GameView gv, char *move, Player player)
+{
+	PlaceId place = getPlaceFromMove(move); //gets placeId for the player
+	for (int i = START_PLAY_ACTION; i < MOVES_SIZE; i++) // starts loop from action move
+	{
+		char encounter = move[i];
+		if (encounter == 'T')
+		{
+			//TO DO
+		}
+		else if (encounter == 'V')
+		{
+			gv->vampLocation = NOWHERE;
+		}
+		else if (encounter == 'D')
+		{
+			updateHealth(gv, player, -LIFE_LOSS_DRACULA_ENCOUNTER );
+		}
+
+	}
+}
+// handles all plays 
+void handlePastPlays(char *pastPlays, GameView gv)
+{
+	char *move = strtok(strdup(pastPlays), MOVE_DELIM); // splits pastplays into player moves
+	int currRound = 0; 
+	while (move != NULL)
+	{
+		//process move
+		Player player = playerFromChar(move[0]); // keeps track of player 
+		if(player != PLAYER_DRACULA)
+		{
+			handleHunter(gv, move, player);
+		}else 
+		{
+			//TO DO Dracula
+		}
+		move = strtok(NULL, MOVE_DELIM); 
+	}
+}
+
 GameView GvNew(char *pastPlays, Message messages[])
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 	GameView new = malloc(sizeof(*new));
-	if (new == NULL) {
-		fprintf(stderr, "Couldn't allocate GameView!\n");
-		exit(EXIT_FAILURE);
+	assert(new != NULL);
+	new->gamescore = GAME_START_SCORE; // set gamescore 
+	new->vampLocation = NOWHERE; // set intial vampire location
+	new->trapLocations = malloc(MAX_TRAPS*sizeof(PlaceId));
+	assert(new->trapLocations != NULL);
+	new->trapLocationSize = 0;
+
+	for (int i = 0; i < MAX_TRAPS; i++)
+	{
+		new->trapLocations[i] = NOWHERE; //initialise trap locations
 	}
+	
+	new->trail = malloc(TRAIL_SIZE *sizeof(PlaceId));
+	new->trailSize = 0;
+
+	for (int i = 0; i < TRAIL_SIZE; i++)
+	{
+		new->trail[i] = NOWHERE; //initialise trail
+	}
+
+	int pastPlaysSize = strlen(pastPlays); //size of pastplays
+	new->round = (pastPlaysSize + 1)/ROUND_SIZE; //computes current round
+	int sizeofLastRound = pastPlaysSize % ROUND_SIZE; //size of last round 
+	
+	if (sizeofLastRound == 0 || sizeofLastRound == LAST_ROUND_SIZE) //if first round or start of last round set to first player
+	{
+		new->player = PLAYER_LORD_GODALMING;
+	}else
+	{
+		new->player = sizeofLastRound/MOVES_SIZE; 
+	}
+	new->playerStats = malloc(NUM_PLAYERS*sizeof(PlayerStats)); // dinamically allocate memory for playerstats array
+	assert(new->playerStats != NULL);
+	// loop initialises all player stats
+	for (int i =0 ; i < NUM_PLAYERS; i++)
+	{
+		new->playerStats[i] = malloc(sizeof(struct playerStats));//allocates memory for playerstats structs
+		assert(new->playerStats[i] != NULL);
+		if (i == PLAYER_DRACULA)
+		{
+			new->playerStats[i]->health = GAME_START_BLOOD_POINTS;
+		}else 
+		{
+			new->playerStats[i]->health = GAME_START_HUNTER_LIFE_POINTS;
+		}
+		new->playerStats[i]->moveHist = malloc(new->round * sizeof(PlaceId));//dynamically allocates memory to round move history
+		assert(new->playerStats[i]->moveHist != NULL);
+		new->playerStats[i]->moveHistSize = 0;
+	}
+	handlePastPlays(pastPlays, new);
+
+
+
 
 	return new;
 }
@@ -52,45 +205,49 @@ void GvFree(GameView gv)
 
 Round GvGetRound(GameView gv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return gv->round;
 }
 
 Player GvGetPlayer(GameView gv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return PLAYER_LORD_GODALMING;
+	return gv->player;
 }
 
 int GvGetScore(GameView gv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return gv->gamescore;
 }
 
 int GvGetHealth(GameView gv, Player player)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return 0;
+	return gv->playerStats[player]->health;
 }
 
 PlaceId GvGetPlayerLocation(GameView gv, Player player)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return NOWHERE;
+	int last = gv->playerStats[player]->moveHistSize -1;
+	if (last == -1)
+		return NOWHERE;
+	//TO DO check header file and add edge cases/ read descriptions
+	
+	return gv->playerStats[player]->moveHist[last];
 }
 
 PlaceId GvGetVampireLocation(GameView gv)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	return NOWHERE;
+	
+	//if (gv->round % 13 != 0 || gv->playerStats[player]->moveHistSize % 6 == 0
+//	|| /* vampire's been vanquished*/ )
+		return NOWHERE;
+	
+	return gv->vampLocation;
 }
 
 PlaceId *GvGetTrapLocations(GameView gv, int *numTraps)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numTraps = 0;
-	return NULL;
+	// TODO: confirm new array required 
+	*numTraps = gv->trapLocationSize;
+	return gv->trapLocations;
 }
 
 ////////////////////////////////////////////////////////////////////////
