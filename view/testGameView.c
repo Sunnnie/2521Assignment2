@@ -182,7 +182,7 @@ int main(void)
 			"GST.... SST.... HST.... MST.... DD1.... "
 			"GFR.... SFR.... HFR.... MFR....";
 		
-		Message messages[] = {
+		Message messages[14] = {
 			"Hello", "Rubbish", "Stuff", "", "Mwahahah",
 			"Aha!", "", "", "", "Back I go"};
 		
@@ -210,7 +210,7 @@ int main(void)
 		Message messages[6] = {};
 		GameView gv = GvNew(trail, messages);
 	
-		assert(GvGetHealth(gv, GAME_START_HUNTER_LIFE_POINTS));
+		assert(GvGetHealth(gv, PLAYER_LORD_GODALMING) == GAME_START_HUNTER_LIFE_POINTS);
 		
 		GvFree(gv);
 		printf("Test passed!\n");
@@ -251,7 +251,7 @@ int main(void)
 		
 		Message messages[10] = {};
 		GameView gv = GvNew(trail, messages);
-		
+		printf("%d\n",GvGetHealth(gv, PLAYER_DRACULA));
 		assert(GvGetHealth(gv, PLAYER_DRACULA) ==
 				GAME_START_BLOOD_POINTS + (2 * LIFE_GAIN_CASTLE_DRACULA));
 		assert(GvGetPlayerLocation(gv, PLAYER_DRACULA) == CASTLE_DRACULA);
@@ -270,7 +270,7 @@ int main(void)
 			"GSZ.... SGE.... HGE.... MGE.... DGAT... "
 			"GSZ.... SGE.... HGE.... MGE....";
 		
-		Message messages[15] = {};
+		Message messages[19] = {};
 		GameView gv = GvNew(trail, messages);
 		
 		assert(GvGetPlayerLocation(gv, PLAYER_DRACULA) == GALATZ);
@@ -281,8 +281,9 @@ int main(void)
 		sortPlaces(traps, numTraps);
 		assert(traps[0] == GALATZ && traps[1] == KLAUSENBURG);
 		free(traps);
-		
+		printf("hi1\n");
 		GvFree(gv);
+		printf("hi2\n");
 		printf("Test passed!\n");
 	}
 	
@@ -496,4 +497,3 @@ int main(void)
 
 	return EXIT_SUCCESS;
 }
-
