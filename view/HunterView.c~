@@ -84,7 +84,8 @@ PlaceId HvGetPlayerLocation(HunterView hv, Player player)
 
 PlaceId HvGetVampireLocation(HunterView hv)
 {
-	returnhv -> view -> vampLocationE;
+	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	return NOWHERE;
 }
 
 ////////////////////////////////////////////////////////////////////////
