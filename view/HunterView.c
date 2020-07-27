@@ -25,6 +25,7 @@
 
 struct hunterView {
 	GameView view;
+	int encounter_Dracula;
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -39,6 +40,11 @@ HunterView HvNew(char *pastPlays, Message messages[])
 	}
     GameView view = malloc(sizeof(*view));
     new->view = GvNew(pastPlays, messages[]);
+	new -> encounter_Dracula = 0;
+	for(int i = 0; pastPlays[i] != '\0'; i++){
+		if(pastPlays[i] == V) new -> encounter_Dracula = 1;
+		break;
+	}
 	return new;
 }
 
@@ -92,8 +98,17 @@ PlaceId HvGetVampireLocation(HunterView hv)
 
 PlaceId HvGetLastKnownDraculaLocation(HunterView hv, Round *round)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*round = 0;
+	// if the Dracula's location is known by hunter
+
+	for(int i = round; round > 0; i--){
+		if(hv -> encounter_Dracula == 1){
+			PlaceId id = GvGetPlayerLocation(hv -> view, hv -> view -> player);
+			return id;
+			break;
+		}
+	}
+	// if the Dracula's location is unknown
+
 	return NOWHERE;
 }
 
@@ -110,17 +125,38 @@ PlaceId *HvGetShortestPathTo(HunterView hv, Player hunter, PlaceId dest,
 
 PlaceId *HvWhereCanIGo(HunterView hv, int *numReturnedLocs)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
-	return NULL;
+	if(hv -> view -> round = 0){
+		*numReturnedLocs = 0;
+		return NULL;
+	}
+	
+	for(int i = 0; i < NUM_PLAYERS; i++){
+		if(i == player) 
+			PlaceId id = hv -> view -> palyStats[i] -> moveHist[hv->view->round];
+		i++;
+		break;
+	}
+
+	return GvGetReachable(hv->view, hv->view->i, hv->view->round, hv->view->id, *numReturnedLocs);
 }
 
 PlaceId *HvWhereCanIGoByType(HunterView hv, bool road, bool rail,
                              bool boat, int *numReturnedLocs)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
-	return NULL;
+	if(hv -> view -> round = 0){
+		*numReturnedLocs = 0;
+		return NULL;
+	}
+	
+	for(int i = 0; i < NUM_PLAYERS; i++){
+		if(i == player) 
+			PlaceId id = hv -> view -> palyStats[i] -> moveHist[hv->view->round];
+		i++;
+		break;
+	}
+
+	return GvGetReachableByType(GameView hv->view, hv->view->i, hv->view->round, 
+								hv->view->id, road, rail, boat, *numReturnedLocs);
 }
 
 PlaceId *HvWhereCanTheyGo(HunterView hv, Player player,
