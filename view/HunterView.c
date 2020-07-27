@@ -38,7 +38,7 @@ HunterView HvNew(char *pastPlays, Message messages[])
 		fprintf(stderr, "Couldn't allocate HunterView!\n");
 		exit(EXIT_FAILURE);
 	}
-    GameView view = malloc(sizeof(*view));
+    GameView view = malloc(sizeof(struct gameView));
     new->view = GvNew(pastPlays, messages[]);
 	new -> encounter_Dracula = 0;
 	for(int i = 0; pastPlays[i] != '\0'; i++){
@@ -90,7 +90,7 @@ PlaceId HvGetPlayerLocation(HunterView hv, Player player)
 
 PlaceId HvGetVampireLocation(HunterView hv)
 {
-	returnhv -> view -> vampLocationE;
+	return hv -> view -> vampLocationE;
 }
 
 ////////////////////////////////////////////////////////////////////////
