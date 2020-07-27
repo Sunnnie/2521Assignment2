@@ -133,6 +133,12 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 		//get all connection && one more case here need to be added: where no place to go 
 		PlaceId *reachable = GvGetReachable(dv->gv, PLAYER_DRACULA, round(dv->gv), GvGetPlayerLocation(dv->gv, PLAYER_DRACULA), numReturnedLocs);
 
+		//no place to go 
+		if (GvGetPlayerLocation(dv->gv, PLAYER_DRACULA) == NOWHERE) {
+			vaildMoves[num] = CASTLE_DRACULA;
+			return vaildMoves; 
+		}
+		
 		//check whether double_back and hidden happen in the last 5(set 6 here toncopy the whole trails array) round
 		PlaceId *trails = malloc(6*sizeof(PlaceId)); 
 		trails = trail_location(dv->gv); 
