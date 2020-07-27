@@ -117,20 +117,21 @@ PlaceId trail_location(gamwView gv)
 */ 
 PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 {
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	PlaceId *moves = malloc(NUM_LOCATIONS*sizeof(PlaceId)); 
+	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION 
+	PlaceId *vaildMoves = malloc(MAX_REAL_PLACE*sizeof(PlaceId));
+	int num = 0; 
 
 	if (round(dv->gv) == 0) {
 		for (int a = 0; a < MAX_REAL_PLACE; a++) {
 			if (a != ST_JOSEPH_AND_ST_MARY) (
+				//having trouble deal with the first case, no sure what to return!
 				*numReturnedMoves++; 
 			)
 		}
+
 	} else {
 		//get all connection && one more case here need to be added: where no place to go 
 		PlaceId *reachable = GvGetReachable(dv->gv, PLAYER_DRACULA, round(dv->gv), GvGetPlayerLocation(dv->gv, PLAYER_DRACULA), numReturnedLocs);
-		PlaceId *vaildMoves = malloc(NUM_LOCATIONS*sizeof(PlaceId)); 
-
 
 		//check whether double_back and hidden happen in the last 5(set 6 here toncopy the whole trails array) round
 		PlaceId *trails = malloc(6*sizeof(PlaceId)); 
@@ -154,7 +155,7 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 			}
 		}
 
-		int num = 0; 
+		 
 		if (hidden == 0) {
 			vaildMoves[num] = GvGetPlayerLocation(dv->gv, PLAYER_DRACULA); 
 			*numReturnedMoves++;
