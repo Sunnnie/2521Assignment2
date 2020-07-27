@@ -173,6 +173,7 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 		//consider all possible moves here
 		int j = 0; 
 		while(reachable[j] != NULL) {
+	
 			//check whether is visited already 
 			int visited = 0;
 			
@@ -190,17 +191,12 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 
 		}
 
+	}
+
 		return vaildMoves; 
 	}
 
 
-
-
-	
-
-	*numReturnedMoves = 0; //not sure on this one 
-	return NULL;
-}
 
 PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 {
