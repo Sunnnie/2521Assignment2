@@ -20,16 +20,16 @@
 #include "Map.h"
 // add your own #includes here
 
-#define MAX_TRAPS 6 
-#define DRACULA_TRAPS 36 
-#define DRACULA_TURN 34 
+#define EACH_TURN 
+#define EACH_ROUND  
+
+#define NUM_LOCATIONS 100
 // TODO: ADD YOUR OWN STRUCTS HERE
 
 struct draculaView {
 	// TODO: ADD FIELDS HERE
 	GameView gv; 
-	PlaceId *trapLocation; 
-	int trapLocationSize; 
+	PlaceId *trail; 
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -44,24 +44,9 @@ DraculaView DvNew(char *pastPlays, Message messages[])
 		exit(EXIT_FAILURE);
 	}
 
-	for (int i = 0; i < MAX_TRAPS; i++) 
-	{
-		new->trapLocation[i] = NOWHERE; 
-	}
 
 	new->gv = GvNew(pastPlays, message); 
-	
-	//
-/*
-	int split = 0; 
 
-	while (split < strlen(pastPlays)) {
-		if (split%DRACULA_TRAPS == 0) {
-
-		}
-	}
-
-*/
 	return new;
 }
 
@@ -111,42 +96,66 @@ PlaceId *DvGetTrapLocations(DraculaView dv, int *numTraps)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
 
-	*numTraps = 0;
-
-	return NULL;
+	*numTraps = trapLocationSize(dv->gv);
+	
+	return GvGetTrapLocation(dv->gv);
 }
 
 ////////////////////////////////////////////////////////////////////////
 // Making a Move
-
+//cases: 
+/*
+Round round(gameView gv) 
+{
+	return (gv->round); 
+}
+*/ 
 PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedMoves = 0;
+
+
+
+
+	
+
+	*numReturnedMoves = 0; //not sure on this one 
 	return NULL;
 }
 
 PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
-	return NULL;
+	Round round_num = round(dv->gv);
+	PlaceId curr = GvGetPlayerLocation(dv->gv, PLAYER_DRACULA);
+	PlaceId *reachable = malloc(NUM_LOCATIONS*sizeof(PlaceId));
+	reachable = GvGetReachable(dv->gv, PLAYER_DRACULA, round_num, curr, numReturnedLocs);
+		
+	return reachable;
 }
 
 PlaceId *DvWhereCanIGoByType(DraculaView dv, bool road, bool boat,
                              int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
-	return NULL;
+	Round round_num = round(dv->gv); 
+	PlaceId curr = GvGetPlayerLocation(dv->gv, PLAYER_DRACULA);
+	PlaceId *reachable_type = malloc(NUM_LOCATIONS*sizeof(PlaceId));
+	reachable_type = GvGetReachableByType(dv->gv, PLAYER_DRACULA, round_num, curr, true, false, true, numReturnedLocs);
+	
+	return reachable_type;
 }
 
 PlaceId *DvWhereCanTheyGo(DraculaView dv, Player player,
                           int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
-	return NULL;
+	Round round_num = round(dv->gv);
+	PlaceId curr = GvGetPlayerLocation(dv->gv, player);
+	PlaceId *reachable = malloc(NUM_LOCATIONS*sizeof(PlaceId));
+	reachable = GvGetReachable(dv->gv, PLAYER_DRACULA, round_num, curr, numReturnedLocs);
+		
+	return reachable;
 }
 
 PlaceId *DvWhereCanTheyGoByType(DraculaView dv, Player player,
@@ -154,8 +163,12 @@ PlaceId *DvWhereCanTheyGoByType(DraculaView dv, Player player,
                                 int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	*numReturnedLocs = 0;
-	return NULL;
+	Round round_num = round(dv->gv); 
+	PlaceId curr = GvGetPlayerLocation(dv->gv, player);
+	PlaceId *reachable_type = malloc(NUM_LOCATIONS*sizeof(PlaceId));
+	reachable_type = GvGetReachableByType(dv->gv, PLAYER_DRACULA, round_num, curr, true, true, true, numReturnedLocs);
+	
+	return reachable_type;
 }
 
 ////////////////////////////////////////////////////////////////////////
