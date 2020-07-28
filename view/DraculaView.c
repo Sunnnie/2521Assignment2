@@ -227,7 +227,7 @@ PlaceId *DvWhereCanIGoByType(DraculaView dv, bool road, bool boat,
 
 	} else {
 		//get all connection && one more case here need to be added: where no place to go 
-		PlaceId *reachable = GvGetReachableByType(dv->gv, PLAYER_DRACULA, round(dv->gv), GvGetPlayerLocation(dv->gv, PLAYER_DRACULA), numReturnedLocs);
+		PlaceId *reachable = GvGetReachableByType(dv->gv, PLAYER_DRACULA, round(dv->gv), GvGetPlayerLocation(dv->gv, PLAYER_DRACULA), road, false, boat, numReturnedLocs);
 
 		//no place to go 
 		if (GvGetPlayerLocation(dv->gv, PLAYER_DRACULA) == NOWHERE) {
@@ -368,3 +368,10 @@ PlaceId *DvWhereCanTheyGoByType(DraculaView dv, Player player,
 // Your own interface functions
 
 // TODO
+
+
+
+GvGetReachableByType 
+
+VaildMoves 
+

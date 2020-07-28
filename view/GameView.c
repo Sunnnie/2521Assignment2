@@ -426,3 +426,8 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 // Your own interface functions
 
 // TODO
+//helper function
+PlaceId trail_location(gamwView gv) 
+{
+	return gv->trail; 
+}
