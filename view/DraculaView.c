@@ -29,7 +29,6 @@
 struct draculaView {
 	// TODO: ADD FIELDS HERE
 	GameView gv; 
-	PlaceId *trail; 
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -138,7 +137,7 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 			vaildMoves[num] = CASTLE_DRACULA;
 			return vaildMoves; 
 		}
-		
+
 		//check whether double_back and hidden happen in the last 5(set 6 here toncopy the whole trails array) round
 		PlaceId *trails = malloc(6*sizeof(PlaceId)); 
 		trails = trail_location(dv->gv); 
