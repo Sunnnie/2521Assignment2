@@ -20,10 +20,7 @@
 #include "Map.h"
 // add your own #includes here
 
-#define EACH_TURN 
-#define EACH_ROUND  
 
-#define NUM_LOCATIONS 100
 // TODO: ADD YOUR OWN STRUCTS HERE
 
 struct draculaView {
@@ -117,14 +114,23 @@ PlaceId trail_location(gamwView gv)
 PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION 
-	PlaceId *vaildMoves = malloc(MAX_REAL_PLACE*sizeof(PlaceId));
+	
+}
+
+
+
+PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
+{
+	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+	PlaceId *vaildLocs = malloc(NUM_REAL_PLACES*sizeof(PlaceId));
 	int num = 0; 
 
-	if (round(dv->gv) == 0) {
-		for (int a = 0; a < MAX_REAL_PLACE; a++) {
+	if (GvGetRound(dv->gv) == 0) {
+		for (int a = 0; a < NUM_REAL_PLACES; a++) {
 			if (a != ST_JOSEPH_AND_ST_MARY) (
 				//having trouble deal with the first case, no sure what to return!
-				*numReturnedMoves++; 
+				vaildLocs[*numReturnedLocs] = a; 
+				*numReturnedLocs++; 
 			)
 		}
 
@@ -134,7 +140,7 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 
 		//no place to go 
 		if (GvGetPlayerLocation(dv->gv, PLAYER_DRACULA) == NOWHERE) {
-			vaildMoves[num] = CASTLE_DRACULA;
+			vaildLocs[num] = CASTLE_DRACULA;
 			return vaildMoves; 
 		}
 
@@ -162,14 +168,14 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 
 		 
 		if (hidden == 0) {
-			vaildMoves[num] = GvGetPlayerLocation(dv->gv, PLAYER_DRACULA); 
+			vaildLocs[num] = GvGetPlayerLocation(dv->gv, PLAYER_DRACULA); 
 			*numReturnedMoves++;
 			num++;
 		} 
 		
 		if (double_back == 0) {
 			for (int b = 5; b > 0; b--) {
-				vaildMoves[num] = trails[b]; 
+				vaildLocs[num] = trails[b]; 
 				*numReturnedMoves++; 
 				num++;
 			}
@@ -190,7 +196,7 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 			}
 
 			if (visited == 0) {
-				vaildMoves[num] = reachable[j]; 
+				vaildLocs[num] = reachable[j]; 
 				*numReturnedMoves++;
 				num++;
 			}
@@ -199,42 +205,128 @@ PlaceId *DvGetValidMoves(DraculaView dv, int *numReturnedMoves)
 
 	}
 
-		return vaildMoves; 
-	}
+		return vaildLocs; 
 
-
-
-PlaceId *DvWhereCanIGo(DraculaView dv, int *numReturnedLocs)
-{
-	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	Round round_num = round(dv->gv);
-	PlaceId curr = GvGetPlayerLocation(dv->gv, PLAYER_DRACULA);
-	PlaceId *reachable = malloc(MAX_REAL_PLACE*sizeof(PlaceId));
-	reachable = GvGetReachable(dv->gv, PLAYER_DRACULA, round_num, curr, numReturnedLocs);
-		
-	return reachable;
 }
 
 PlaceId *DvWhereCanIGoByType(DraculaView dv, bool road, bool boat,
                              int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	Round round_num = round(dv->gv); 
-	PlaceId curr = GvGetPlayerLocation(dv->gv, PLAYER_DRACULA);
-	PlaceId *reachable_type = malloc(MAX_REAL_PLACE*sizeof(PlaceId));
-	reachable_type = GvGetReachableByType(dv->gv, PLAYER_DRACULA, round_num, curr, true, false, true, numReturnedLocs);
+	PlaceId *vaildLocs_type = malloc(NUM_REAL_PLACES*sizeof(PlaceId));
+	int num = 0; 
+
+	if (GvGetRound(dv->gv) == 0) {
+		for (int a = 0; a < NUM_REAL_PLACES; a++) {
+			if (a != ST_JOSEPH_AND_ST_MARY) (
+				//having trouble deal with the first case, no sure what to return!
+				vaildLocs_type[*numReturnedLocs] = a; 
+				*numReturnedLocs++; 
+			)
+		}
+
+	} else {
+		//get all connection && one more case here need to be added: where no place to go 
+		PlaceId *reachable = GvGetReachableByType(dv->gv, PLAYER_DRACULA, round(dv->gv), GvGetPlayerLocation(dv->gv, PLAYER_DRACULA), numReturnedLocs);
+
+		//no place to go 
+		if (GvGetPlayerLocation(dv->gv, PLAYER_DRACULA) == NOWHERE) {
+			vaildLocs_type[num] = CASTLE_DRACULA;
+			return vaildMoves; 
+		}
+
+		//check whether double_back and hidden happen in the last 5(set 6 here toncopy the whole trails array) round
+		PlaceId *trails = malloc(6*sizeof(PlaceId)); 
+		trails = trail_location(dv->gv); 
+
+		int hidden = 0;
+		int double_back = 0; 
+
+		//can hide at sea 
+		if (GvGetPlayerLocation(dv->gv, PLAYER_DRACULA) == SEA) {
+			hidden = 1; 
+		}
+
+		//only consider the last 5 moves here
+		for (int i = 5; i > 0; i--) {
+			if (trails[i] >= DOUBLE_BACK_1 && trails[i] <= DOUBLE_BACK_5) {
+				double_back = 1; 
+			}
+			if(trails[i] == HIDE) {
+				hidden = 1; 
+			}
+		}
+
+		 
+		if (hidden == 0) {
+			vaildLocs_type[num] = GvGetPlayerLocation(dv->gv, PLAYER_DRACULA); 
+			*numReturnedMoves++;
+			num++;
+		} 
+		
+		if (double_back == 0) {
+			for (int b = 5; b > 0; b--) {
+				vaildLocs_type[num] = trails[b]; 
+				*numReturnedMoves++; 
+				num++;
+			}
+		}
+
+		//consider all possible moves here
+		int j = 0; 
+		while(reachable[j] != NULL) {
 	
-	return reachable_type;
+			//check whether is visited already 
+			int visited = 0;
+			
+			for (int a = 5; a > 0; a--) {
+				if (reachable[j] == trails[a]) {
+					visited = 1; 
+				}
+			}
+
+			if (visited == 0) {
+				vaildLocs_type[num] = reachable[j]; 
+				*numReturnedMoves++;
+				num++;
+			}
+
+		}
+
+	}
+
+		return vaildLocs_type; 
+
 }
 
 PlaceId *DvWhereCanTheyGo(DraculaView dv, Player player,
                           int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	Round round_num = round(dv->gv);
-	PlaceId curr = GvGetPlayerLocation(dv->gv, player);
-	PlaceId *reachable = malloc(MAX_REAL_PLACE*sizeof(PlaceId));
-	reachable = GvGetReachable(dv->gv, PLAYER_DRACULA, round_num, curr, numReturnedLocs);
+	PlaceId *reachable = malloc(NUM_REAL_PLACES*sizeof(PlaceId)); 
+	*numReturnedLocs = 0; 
+
+	if(player == PLAYER_DRACULA) {
+		reachable_type =  DvWhereCanIGoBy(dv, numReturnedLocs);
+	} else {
+
+		Round next_move; 
+
+		if (player >= GvGetPlayer(dv->gv)) {
+			next_move = GvGetRound(dv->gv); //next move happen in this round, not his turn yet 
+		} else {
+			next_move = GvGetRound(dv->gv) + 1; 
+		}
+
+		if (next_move == 0) { //first round
+			for (int a = 0; a < NUM_REAL_PLACES; a++) {
+				reachable_type[*numReturnedLocs] = i;
+				*numReturnedLocs++; 
+			}
+		}  else {
+			reachable_type = GvGetReachable(dv->gv, player, next_move, GvGetPlayerLocation(dv->gv, player), *numReturnedLocs); 
+		}
+	}
 		
 	return reachable;
 }
@@ -244,10 +336,30 @@ PlaceId *DvWhereCanTheyGoByType(DraculaView dv, Player player,
                                 int *numReturnedLocs)
 {
 	// TODO: REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-	Round round_num = round(dv->gv); 
-	PlaceId curr = GvGetPlayerLocation(dv->gv, player);
-    PlaceId *reachable_type = malloc(MAX_REAL_PLACE*sizeof(PlaceId));
-	reachable_type = GvGetReachableByType(dv->gv, PLAYER_DRACULA, round_num, curr, true, true, true, numReturnedLocs);
+	PlaceId *reachable_type = malloc(NUM_REAL_PLACES*sizeof(PlaceId)); 
+	*numReturnedLocs = 0; 
+	
+	if(player == PLAYER_DRACULA) {
+		reachable_type =  DvWhereCanIGoByType(dv, road, boat, numReturnedLocs);
+	} else {
+
+		Round next_move; 
+
+		if (player >= GvGetPlayer(dv->gv)) {
+			next_move = GvGetRound(dv->gv); //next move happen in this round, not his turn yet 
+		} else {
+			next_move = GvGetRound(dv->gv) + 1; 
+		}
+
+		if (next_move == 0) { //first round
+			for (int a = 0; a < NUM_REAL_PLACES; a++) {
+				reachable_type[*numReturnedLocs] = i;
+				*numReturnedLocs++; 
+			}
+		}  else {
+			reachable_type = GvGetReachableByType(dv->gv, player, next_move, GvGetPlayerLocation(dv->gv, player), road, rail, boat, *numReturnedLocs); 
+		}
+	}
 	
 	return reachable_type;
 }
