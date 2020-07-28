@@ -427,7 +427,7 @@ PlaceId *GvGetReachableByType(GameView gv, Player player, Round round,
 
 // TODO
 //helper function
-PlaceId trail_location(gamwView gv) 
+PlaceId trail_location(GameView gv) 
 {
 	return gv->trail; 
 }
